@@ -62,6 +62,7 @@ object TeraGen {
 
     assert(recordsPerPartition < Int.MaxValue, s"records per partition > ${Int.MaxValue}")
 
+    val start = System.currentTimeMillis()
 
     val dataset = sc.parallelize(1 to parts, parts).mapPartitionsWithIndex { case (index, _) =>
       val one = new Unsigned16(1)
@@ -91,7 +92,10 @@ object TeraGen {
 
     dataset.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFile)
 
-    println("Number of records written: " + dataset.count())
+    val runtime = System.currentTimeMillis() - start
+
+    println(s"Number of records written: ${dataset.count()}," +
+      s" total size ${size}, runtime: ${runtime / 1000}s")
   }
 
   def sizeStrToBytes(str: String): Long = {
